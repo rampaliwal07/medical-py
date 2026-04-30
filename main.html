@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifeline Medical Store | Billing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .header-section { background: #007bff; color: white; padding: 20px; border-radius: 15px 15px 0 0; }
+        .btn-add { background-color: #28a745; color: white; }
+        .invoice-box { background: white; padding: 30px; border-radius: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <div class="card mb-4">
+                <div class="header-section text-center">
+                    <h2>LIFELINE MEDICAL STORE</h2>
+                    <p class="mb-0">Digital Billing System</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Customer Name</label>
+                            <input type="text" id="custName" class="form-control" placeholder="Enter Name">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" id="custPhone" class="form-control" placeholder="Enter Phone">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Address</label>
+                            <input type="text" id="custAddress" class="form-control" placeholder="City, Street">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header bg-light"><strong>Add Medicines</strong></div>
+                <div class="card-body">
+                    <form id="medForm" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Medicine Name</label>
+                            <input type="text" id="medName" class="form-control" required>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" id="medQty" class="form-control" min="1" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Price Per Unit (Rs.)</label>
+                            <input type="number" step="0.01" id="medPrice" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-add w-100">Add to List</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="invoice-box shadow-sm">
+                <h4 class="text-center text-primary mb-4">INVOICE PREVIEW</h4>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <h6><strong>Customer Details:</strong></h6>
+                        <div id="displayCustName">Name: ---</div>
+                        <div id="displayCustPhone">Phone: ---</div>
+                    </div>
+                    <div class="col-6 text-end">
+                        <h6><strong>Date:</strong></h6>
+                        <div id="currentDate"></div>
+                    </div>
+                </div>
+
+                <table class="table table-hover mt-4">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billTableBody">
+                        </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" class="text-end">GRAND TOTAL:</th>
+                            <th class="text-primary">Rs. <span id="grandTotalDisplay">0.00</span></th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary px-5" onclick="window.print()">Print Bill</button>
+                    <button class="btn btn-outline-danger ms-2" onclick="location.reload()">Reset</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    let grandTotal = 0;
+
+    // Set Current Date
+    document.getElementById('currentDate').innerText = new Date().toLocaleDateString();
+
+    const medForm = document.getElementById('medForm');
+    const billTableBody = document.getElementById('billTableBody');
+
+    medForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Get Values
+        const name = document.getElementById('medName').value;
+        const qty = parseInt(document.getElementById('medQty').value);
+        const price = parseFloat(document.getElementById('medPrice').value);
+        const total = qty * price;
+
+        // Update Grand Total
+        grandTotal += total;
+        document.getElementById('grandTotalDisplay').innerText = grandTotal.toFixed(2);
+
+        // Update Customer Display
+        document.getElementById('displayCustName').innerText = "Name: " + document.getElementById('custName').value;
+        document.getElementById('displayCustPhone').innerText = "Phone: " + document.getElementById('custPhone').value;
+
+        // Create Table Row
+        const row = `<tr>
+            <td>${name}</td>
+            <td>${qty}</td>
+            <td>${price.toFixed(2)}</td>
+            <td>${total.toFixed(2)}</td>
+        </tr>`;
+
+        billTableBody.innerHTML += row;
+
+        // Reset medicine inputs
+        medForm.reset();
+    });
+</script>
+
+</body>
+</html>
