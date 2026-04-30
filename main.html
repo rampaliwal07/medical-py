@@ -3,150 +3,261 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lifeline Medical Store | Billing</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Lifeline Medical - Secure Billing</title>
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .header-section { background: #007bff; color: white; padding: 20px; border-radius: 15px 15px 0 0; }
-        .btn-add { background-color: #28a745; color: white; }
-        .invoice-box { background: white; padding: 30px; border-radius: 15px; }
+        body {
+            background-color: #eef2f3;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Login Screen */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .login-box input {
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+        .login-box button {
+            padding: 10px 20px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Main Dashboard */
+        .container {
+            display: none; /* Hidden until login */
+            width: 90%;
+            max-width: 1000px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            margin: 20px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        input, button { font-family: inherit; }
+        label { font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
+        input { width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+
+        .btn-add { background: #007bff; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; }
+        .btn-delete { background: #ff4d4d; color: white; border: none; padding: 2px 8px; cursor: pointer; border-radius: 3px; }
+
+        /* Thermal Receipt Styling */
+        #receipt-area {
+            width: 300px;
+            background: #fff;
+            margin: 20px auto;
+            padding: 15px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            border: 1px solid #eee;
+            color: #000;
+        }
+
+        .receipt-header { text-align: center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px; }
+        .receipt-header h2 { margin: 5px 0; font-size: 18px; }
+
+        .receipt-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .receipt-table th { border-bottom: 1px dashed #000; text-align: left; }
+        .receipt-table td { padding: 5px 0; }
+        
+        .receipt-footer { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; }
+        .total-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 16px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-area, #receipt-area * { visibility: visible; }
+            #receipt-area { position: absolute; left: 0; top: 0; width: 80mm; box-shadow: none; border: none; }
+            .btn-delete { display: none; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            
-            <div class="card mb-4">
-                <div class="header-section text-center">
-                    <h2>LIFELINE MEDICAL STORE</h2>
-                    <p class="mb-0">Digital Billing System</p>
-                </div>
-                <div class="card-body p-4">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Customer Name</label>
-                            <input type="text" id="custName" class="form-control" placeholder="Enter Name">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Phone Number</label>
-                            <input type="text" id="custPhone" class="form-control" placeholder="Enter Phone">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Address</label>
-                            <input type="text" id="custAddress" class="form-control" placeholder="City, Street">
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div id="login-overlay">
+    <div class="login-box">
+        <h3>LIFELINE MEDICAL LOGIN</h3>
+        <input type="password" id="passInput" placeholder="Enter Admin Password">
+        <br>
+        <button onclick="checkLogin()">Login</button>
+        <p id="errorMsg" style="color:red; display:none;">Incorrect Password!</p>
+    </div>
+</div>
 
-            <div class="card mb-4">
-                <div class="card-header bg-light"><strong>Add Medicines</strong></div>
-                <div class="card-body">
-                    <form id="medForm" class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label">Medicine Name</label>
-                            <input type="text" id="medName" class="form-control" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label">Quantity</label>
-                            <input type="number" id="medQty" class="form-control" min="1" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Price Per Unit (Rs.)</label>
-                            <input type="number" step="0.01" id="medPrice" class="form-control" required>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-add w-100">Add to List</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="invoice-box shadow-sm">
-                <h4 class="text-center text-primary mb-4">INVOICE PREVIEW</h4>
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <h6><strong>Customer Details:</strong></h6>
-                        <div id="displayCustName">Name: ---</div>
-                        <div id="displayCustPhone">Phone: ---</div>
-                    </div>
-                    <div class="col-6 text-end">
-                        <h6><strong>Date:</strong></h6>
-                        <div id="currentDate"></div>
-                    </div>
-                </div>
-
-                <table class="table table-hover mt-4">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Medicine</th>
-                            <th>Qty</th>
-                            <th>Price</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="billTableBody">
-                        </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3" class="text-end">GRAND TOTAL:</th>
-                            <th class="text-primary">Rs. <span id="grandTotalDisplay">0.00</span></th>
-                        </tr>
-                    </tfoot>
-                </table>
-
-                <div class="text-center mt-4">
-                    <button class="btn btn-primary px-5" onclick="window.print()">Print Bill</button>
-                    <button class="btn btn-outline-danger ms-2" onclick="location.reload()">Reset</button>
-                </div>
-            </div>
-
+<div class="container" id="mainApp">
+    <h2 style="text-align:center; color:#2c3e50;">Billing Dashboard</h2>
+    
+    <div class="input-grid">
+        <div>
+            <label>Customer Name</label>
+            <input type="text" id="cName" oninput="updateHeader()">
         </div>
+        <div>
+            <label>Phone</label>
+            <input type="text" id="cPhone" oninput="updateHeader()">
+        </div>
+    </div>
+
+    <div class="input-grid" style="background:#e8f4fd;">
+        <div>
+            <label>Medicine Name</label>
+            <input type="text" id="mName">
+        </div>
+        <div>
+            <label>Qty</label>
+            <input type="number" id="mQty">
+        </div>
+        <div>
+            <label>Price</label>
+            <input type="number" id="mPrice">
+        </div>
+        <div>
+            <label>&nbsp;</label>
+            <button class="btn-add" onclick="addItem()">Add Item</button>
+        </div>
+    </div>
+
+    <!-- Thermal Receipt Preview -->
+    <div id="receipt-area">
+        <div class="receipt-header">
+            <h2>LIFELINE MEDICAL</h2>
+            <p style="font-size:12px;">New Design St, Medical City<br>Tel: +91 0000000000</p>
+            <div style="text-align:left; font-size:11px; margin-top:10px;">
+                CUST: <span id="resName">---</span><br>
+                PH: <span id="resPhone">---</span><br>
+                DATE: <span id="resDate"></span>
+            </div>
+        </div>
+
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="resBody">
+                <!-- Items go here -->
+            </tbody>
+        </table>
+
+        <div class="receipt-footer">
+            <div class="total-row">
+                <span>GRAND TOTAL</span>
+                <span>Rs. <span id="resTotal">0.00</span></span>
+            </div>
+            <p style="text-align:center; font-size:11px; margin-top:15px;">*** THANK YOU ***</p>
+        </div>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+        <button onclick="window.print()" style="padding:10px 30px; background:#2c3e50; color:white; border:none; cursor:pointer;">Print Thermal Receipt</button>
     </div>
 </div>
 
 <script>
-    let grandTotal = 0;
+    let items = [];
 
-    // Set Current Date
-    document.getElementById('currentDate').innerText = new Date().toLocaleDateString();
+    function checkLogin() {
+        const pass = document.getElementById('passInput').value;
+        if(pass === "admin123") {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('resDate').innerText = new Date().toLocaleString();
+        } else {
+            document.getElementById('errorMsg').style.display = 'block';
+        }
+    }
 
-    const medForm = document.getElementById('medForm');
-    const billTableBody = document.getElementById('billTableBody');
+    function updateHeader() {
+        document.getElementById('resName').innerText = document.getElementById('cName').value || "---";
+        document.getElementById('resPhone').innerText = document.getElementById('cPhone').value || "---";
+    }
 
-    medForm.addEventListener('submit', function(e) {
-        e.preventDefault();
+    function addItem() {
+        const name = document.getElementById('mName').value;
+        const qty = parseFloat(document.getElementById('mQty').value);
+        const price = parseFloat(document.getElementById('mPrice').value);
 
-        // Get Values
-        const name = document.getElementById('medName').value;
-        const qty = parseInt(document.getElementById('medQty').value);
-        const price = parseFloat(document.getElementById('medPrice').value);
-        const total = qty * price;
+        if(!name || !qty || !price) return alert("Fill all item details");
 
-        // Update Grand Total
-        grandTotal += total;
-        document.getElementById('grandTotalDisplay').innerText = grandTotal.toFixed(2);
+        const item = {
+            id: Date.now(),
+            name: name,
+            qty: qty,
+            price: price,
+            total: qty * price
+        };
 
-        // Update Customer Display
-        document.getElementById('displayCustName').innerText = "Name: " + document.getElementById('custName').value;
-        document.getElementById('displayCustPhone').innerText = "Phone: " + document.getElementById('custPhone').value;
+        items.push(item);
+        renderTable();
+        
+        // Clear inputs
+        document.getElementById('mName').value = "";
+        document.getElementById('mQty').value = "";
+        document.getElementById('mPrice').value = "";
+    }
 
-        // Create Table Row
-        const row = `<tr>
-            <td>${name}</td>
-            <td>${qty}</td>
-            <td>${price.toFixed(2)}</td>
-            <td>${total.toFixed(2)}</td>
-        </tr>`;
+    function deleteItem(id) {
+        items = items.filter(item => item.id !== id);
+        renderTable();
+    }
 
-        billTableBody.innerHTML += row;
+    function renderTable() {
+        const body = document.getElementById('resBody');
+        body.innerHTML = "";
+        let grandTotal = 0;
 
-        // Reset medicine inputs
-        medForm.reset();
-    });
+        items.forEach(item => {
+            grandTotal += item.total;
+            body.innerHTML += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.qty}</td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${item.total.toFixed(2)}</td>
+                    <td><button class="btn-delete" onclick="deleteItem(${item.id})">x</button></td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('resTotal').innerText = grandTotal.toFixed(2);
+    }
 </script>
 
 </body>
