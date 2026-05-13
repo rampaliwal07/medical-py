@@ -1,9 +1,10 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lifeline Medical System | Elegant Billing</title>
+    <title>Lifeline Medical System | Smart Billing with GST</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,7 +16,7 @@
             color: #333;
         }
 
-        /* Login Screen - Blurred Background */
+        /* Login Screen - Blur + Animations */
         #login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -26,15 +27,28 @@
             align-items: center;
             z-index: 2000;
         }
+        @keyframes fadeSlideUp {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
         .login-card {
-            width: 400px;
-            border-radius: 20px;
+            width: 420px;
+            border-radius: 28px;
             overflow: hidden;
+            animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+        }
+        .shake-effect {
+            animation: shakeError 0.3s ease-in-out 0s 2;
         }
 
         /* Main App Container */
         .app-container {
-            display: none; /* Hidden until login */
+            display: none;
             margin-top: 30px;
             margin-bottom: 50px;
         }
@@ -42,278 +56,388 @@
         /* Cards and Elements Styling */
         .card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
             margin-bottom: 25px;
         }
         .card-header {
             background-color: #fff;
             border-bottom: 1px solid #eee;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 1.2rem;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 1.2rem 1.5rem;
         }
         .section-icon {
             color: #0d6efd;
             margin-right: 10px;
         }
 
-        /* Form Inputs Modernization */
-        .form-control {
-            border-radius: 10px;
-            padding: 12px;
-            border: 1px solid #ddd;
+        /* Autocomplete Styles */
+        .autocomplete-wrapper {
+            position: relative;
         }
-        .form-control:focus {
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
-            border-color: #0d6efd;
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+            z-index: 999;
+            max-height: 260px;
+            overflow-y: auto;
+            display: none;
         }
-
-        /* Buttons Styling */
-        .btn-action {
-            border-radius: 10px;
-            padding: 12px 20px;
-            font-weight: 600;
+        .autocomplete-list.show {
+            display: block;
         }
-        .btn-add-item { background-color: #198754; color: white; border: none; }
-        .btn-add-item:hover { background-color: #157347; color: white; }
-        
-        .btn-delete {
-            background: none;
-            border: none;
-            color: #dc3545;
+        .autocomplete-item {
+            padding: 10px 16px;
             cursor: pointer;
-            padding: 0;
-            opacity: 0.7;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
         }
-        .btn-delete:hover { opacity: 1; }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover, .autocomplete-item.active {
+            background-color: #eef5ff;
+            color: #0a58ca;
+        }
+        .med-price {
+            font-weight: 500;
+            color: #2c7da0;
+            font-size: 0.8rem;
+        }
 
-        /* Thermal Receipt - Modernized Preview */
+        /* Sticky Summary Bar */
+        .invoice-summary-sticky {
+            background: #ffffff;
+            border-top: 2px solid #e9ecef;
+            border-radius: 0 0 20px 20px;
+            padding: 1rem 1.5rem;
+            margin-top: 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+        }
+        .gst-btn-group .btn-gst {
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-gst-active {
+            background-color: #0d6efd !important;
+            color: white !important;
+            border-color: #0d6efd !important;
+        }
+
+        /* Receipt area improvements */
         #receipt-area {
             width: 100%;
             max-width: 320px;
             background: #fff;
             margin: 0 auto;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            font-family: 'Courier New', Courier, monospace;
+            padding: 18px 14px;
+            border-radius: 16px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+            font-family: 'Courier New', 'SF Mono', monospace;
             color: #000;
         }
-        
         .receipt-header h3 { font-size: 1.1rem; }
-        .receipt-table { width: 100%; font-size: 0.85rem; margin-top: 15px; }
+        .receipt-table { width: 100%; font-size: 0.78rem; margin-top: 12px; }
         .receipt-table th { border-bottom: 1px dashed #333; text-align: left; }
-        .receipt-table td { padding: 4px 0; }
-        .receipt-total { border-top: 1px dashed #333; margin-top: 10px; padding-top: 10px; font-weight: bold; }
+        .receipt-table td { padding: 6px 0; }
+        .receipt-summary-box {
+            background: #fef9e6;
+            padding: 8px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin: 12px 0 8px;
+            border-left: 3px solid #0d6efd;
+        }
+        /* Smooth receipt row animation */
+        @keyframes slideInNewRow {
+            0% { opacity: 0; transform: translateX(20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        .receipt-item-row {
+            animation: slideInNewRow 0.25s ease-out forwards;
+        }
+
+        .btn-add-item { background-color: #198754; color: white; border: none; border-radius: 12px; }
+        .btn-add-item:hover { background-color: #157347; }
+        .btn-delete {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-delete:hover { opacity: 0.8; transform: scale(1.05); }
 
         @media print {
             body * { visibility: hidden; }
             #receipt-area, #receipt-area * { visibility: visible; }
             #receipt-area { position: absolute; left: 0; top: 0; width: 80mm; box-shadow: none; }
             .btn-delete { display: none !important; }
+            .invoice-summary-sticky { display: none; }
         }
     </style>
 </head>
 <body>
 
+<!-- LOGIN OVERLAY -->
 <div id="login-overlay">
-    <div class="card login-card shadow-lg">
-        <div class="card-header bg-primary text-white text-center p-4">
+    <div class="card login-card shadow-lg border-0">
+        <div class="card-header bg-primary text-white text-center p-4" style="background: linear-gradient(135deg, #0b5ed7, #0a58ca);">
             <i class="fas fa-hand-holding-medical fa-3x mb-3"></i>
-            <h4 class="mb-0">LIFELINE MEDICAL</h4>
-            <p class="mb-0 opacity-75">Billing System Login</p>
+            <h4 class="mb-0 fw-bold">LIFELINE MEDICAL</h4>
+            <p class="mb-0 opacity-75">Secure Billing Portal</p>
         </div>
         <div class="card-body p-4">
             <div class="mb-4">
-                <label class="form-label text-muted">Admin Password</label>
-                <input type="password" id="passInput" class="form-control text-center fs-5" placeholder="••••••••">
+                <label class="form-label text-muted fw-semibold">Admin Password</label>
+                <input type="password" id="passInput" class="form-control text-center py-2" placeholder="••••••••">
             </div>
-            <p id="errorMsg" class="text-danger text-center mb-3" style="display:none;">Incorrect Password. Try again.</p>
-            <button class="btn btn-primary btn-action w-100 fs-5" onclick="checkLogin()">Unlock Dashboard <i class="fas fa-lock-open ms-2"></i></button>
+            <p id="errorMsg" class="text-danger text-center mb-3" style="display:none;"><i class="fas fa-exclamation-triangle me-1"></i> Incorrect password. Access denied.</p>
+            <button class="btn btn-primary btn-lg w-100 fw-semibold" onclick="checkLogin()">Unlock Dashboard <i class="fas fa-lock-open ms-2"></i></button>
         </div>
     </div>
 </div>
 
+<!-- MAIN APP -->
 <div class="container app-container" id="mainApp">
-    
     <div class="row mb-4 align-items-center">
         <div class="col">
-            <h2 class="fw-bold mb-0 text-primary">Billing Dashboard</h2>
-            <p class="text-muted mb-0">Create and Manage Customer Invoices</p>
+            <h2 class="fw-bold mb-0 text-primary"><i class="fas fa-clinic-medical me-2"></i>Billing Dashboard</h2>
+            <p class="text-muted">Smart invoice with GST & medicine auto‑complete</p>
         </div>
         <div class="col-auto text-end">
-            <div class="text-muted mb-1">Authenticated As: <strong>Admin</strong></div>
-            <button class="btn btn-outline-danger btn-sm" onclick="location.reload()">Logout <i class="fas fa-sign-out-alt"></i></button>
+            <div class="text-muted mb-1">Authenticated: <strong>Admin</strong></div>
+            <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="location.reload()"><i class="fas fa-sign-out-alt me-1"></i> Logout</button>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-4">
+        <!-- LEFT COLUMN -->
         <div class="col-lg-8">
-            
-            <div class="card">
-                <div class="card-header">
+            <!-- Customer Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
                     <h5 class="mb-0"><i class="fas fa-user-circle section-icon"></i>Customer Information</h5>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Full Name</label>
+                            <label class="form-label text-muted fw-semibold">Full Name</label>
                             <input type="text" id="cName" class="form-control" placeholder="John Doe" oninput="updateHeader()">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Phone Number</label>
+                            <label class="form-label text-muted fw-semibold">Phone Number</label>
                             <input type="text" id="cPhone" class="form-control" placeholder="+91 9876543210" oninput="updateHeader()">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-pills section-icon"></i>Add Medicines</h5>
+            <!-- Add Medicines with Autocomplete -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-pills section-icon text-success"></i>Add Medicines</h5>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-5">
-                            <label class="form-label text-muted">Medicine Name</label>
-                            <input type="text" id="mName" class="form-control" placeholder="Paracetamol 500mg">
+                            <label class="form-label text-muted fw-semibold">Medicine Name</label>
+                            <div class="autocomplete-wrapper">
+                                <input type="text" id="mName" class="form-control" placeholder="Start typing..." autocomplete="off" oninput="showSuggestions(this.value)" onkeydown="handleKey(event)">
+                                <div class="autocomplete-list" id="autoList"></div>
+                            </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label text-muted">Quantity</label>
+                            <label class="form-label text-muted fw-semibold">Quantity</label>
                             <input type="number" id="mQty" class="form-control text-center" min="1" value="1">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label text-muted">Price Per Unit (Rs.)</label>
-                            <input type="number" step="0.01" id="mPrice" class="form-control text-center" placeholder="10.00">
+                            <label class="form-label text-muted fw-semibold">Price (₹)</label>
+                            <input type="number" step="0.01" id="mPrice" class="form-control text-center" placeholder="0.00">
                         </div>
                         <div class="col-md-2">
-                            <button class="btn btn-add-item btn-action w-100" onclick="addItem()"><i class="fas fa-plus"></i> Add</button>
+                            <button class="btn btn-add-item w-100 py-2 fw-semibold" onclick="addItem()"><i class="fas fa-plus me-1"></i> Add</button>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+            <!-- Invoice Items Table + Sticky Summary Bar -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-list-ul section-icon"></i>Invoice Items</h5>
-                    <span class="badge bg-primary rounded-pill fs-6" id="itemCountBadge">0 Items</span>
+                    <span class="badge bg-primary rounded-pill px-3 py-2" id="itemCountBadge">0 Items</span>
                 </div>
                 <div class="card-body p-0">
-                    <table class="table table-hover table-striped table-bordered align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">Medicine Name</th>
-                                <th class="text-center">Qty</th>
-                                <th class="text-center">Price</th>
-                                <th class="text-center">Total</th>
-                                <th class="text-center" width="60">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resBodyTable">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr><th class="ps-3">Medicine Name</th><th class="text-center">Qty</th><th class="text-center">Price (₹)</th><th class="text-center">Total (₹)</th><th class="text-center">Action</th></tr>
+                            </thead>
+                            <tbody id="resBodyTable">
+                                <tr><td colspan="5" class="text-center text-muted py-4">No items added</td></tr>
                             </tbody>
-                    </table>
+                        </table>
+                    </div>
+                </div>
+                <!-- STICKY GRAND TOTAL BAR with GST toggle -->
+                <div class="invoice-summary-sticky" id="grandTotalStickyBar">
+                    <div class="row align-items-center gy-2">
+                        <div class="col-md-5 col-12">
+                            <div class="d-flex gap-2 align-items-center flex-wrap">
+                                <span class="fw-semibold text-secondary">GST :</span>
+                                <div class="btn-group gst-btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary btn-sm btn-gst" data-gst="0" onclick="setGSTRate(0)">0%</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm btn-gst" data-gst="5" onclick="setGSTRate(5)">5%</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm btn-gst" data-gst="18" onclick="setGSTRate(18)">18%</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7 col-12">
+                            <div class="d-flex justify-content-between flex-wrap gap-2">
+                                <div><span class="text-muted">Subtotal :</span> <strong id="stickySubtotal">₹0.00</strong></div>
+                                <div><span class="text-muted">GST (<span id="gstRateLabel">5</span>%) :</span> <strong id="stickyGstAmount">₹0.00</strong></div>
+                                <div class="text-primary fw-bold fs-6">TOTAL : <span id="stickyGrandTotal">₹0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </div>
 
-        <div class="col-lg-4 text-center">
-            <h5 class="mb-3 text-muted">Thermal Receipt Preview</h5>
-            
+        <!-- RIGHT COLUMN : Receipt Preview -->
+        <div class="col-lg-4">
+            <h5 class="mb-3 text-center text-muted"><i class="fas fa-receipt me-2"></i>Thermal Receipt Preview</h5>
             <div id="receipt-area">
                 <div class="receipt-header text-center">
-                    <i class="fas fa-hand-holding-medical fa-2x mb-2" style="opacity:0.3;"></i>
-                    <h3 class="fw-bold mb-0">LIFELINE MEDICAL</h3>
-                    <p class="text-muted" style="font-size:0.75rem;">Medical Store, New City<br>Tel: +91 00000 00000</p>
-                    <div style="text-align:left; font-size:0.7rem; margin-top:15px; border-top: 1px dashed #333; padding-top: 10px;">
+                    <i class="fas fa-hand-holding-medical fa-2x mb-2" style="opacity:0.4; color:#0d6efd;"></i>
+                    <h3 class="fw-bold mb-0" style="font-size:1.2rem;">LIFELINE MEDICAL</h3>
+                    <p style="font-size:0.7rem;" class="text-muted">Medical Store, New City<br>Tel: +91 98765 43210</p>
+                    <div style="text-align:left; font-size:0.7rem; margin-top:10px; border-top:1px dashed #aaa; padding-top:8px;">
                         CUST: <span id="resName">---</span><br>
                         PHONE: <span id="resPhone">---</span><br>
                         DATE: <span id="resDate"></span>
                     </div>
                 </div>
-
-                <table class="receipt-table">
-                    <thead>
-                        <tr>
-                            <th width="50%">Item</th>
-                            <th width="10%">Qty</th>
-                            <th width="20%">Price</th>
-                            <th width="20%">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody id="resBodyReceipt">
-                        </tbody>
+                <table class="receipt-table w-100">
+                    <thead><tr><th>Item</th><th>Qty</th><th>₹</th><th>Total</th></tr></thead>
+                    <tbody id="resBodyReceipt"></tbody>
                 </table>
-
-                <div class="receipt-total pt-3 mt-3 d-flex justify-content-between">
-                    <span>GRAND TOTAL</span>
-                    <span class="fs-5">Rs. <span id="resTotal">0.00</span></span>
-                </div>
-                
-                <div class="receipt-footer mt-4 pt-3 text-center" style="border-top:1px dashed #333; font-size:0.75rem;">
-                    *** THANK YOU FOR VISITING! ***<br>
-                    Keep Receipt For Records
+                <div id="receiptSummaryBox" class="receipt-summary-box mt-2"></div>
+                <div class="receipt-footer mt-3 pt-2 text-center" style="border-top:1px dashed #aaa; font-size:0.7rem;">
+                    *** THANK YOU FOR VISITING! ***<br>Keep receipt for records
                 </div>
             </div>
-
-            <div class="d-grid gap-2 mt-4 max-width-320 mx-auto">
-                <button class="btn btn-primary btn-action btn-lg fs-5" onclick="window.print()">Print Receipt <i class="fas fa-print ms-2"></i></button>
-                <button class="btn btn-outline-secondary btn-action" onclick="resetInvoice()">New Invoice <i class="fas fa-file-medical ms-2"></i></button>
+            <div class="d-grid gap-3 mt-4">
+                <button class="btn btn-primary btn-lg fw-semibold shadow-sm" onclick="window.print()"><i class="fas fa-print me-2"></i> Print Receipt</button>
+                <button class="btn btn-outline-secondary fw-semibold" onclick="resetInvoice()"><i class="fas fa-file-invoice me-2"></i> New Invoice</button>
             </div>
         </div>
-
     </div>
 </div>
 
 <script>
-    let items = [];
+    // -------------------- 100 MEDICINES DATABASE (exact list) --------------------
+    const medicineDB = [
+        { name: "Paracetamol 500mg", price: 20 },{ name: "Crocin Advance", price: 35 },{ name: "Dolo 650", price: 32 },{ name: "Calpol 650", price: 34 },
+        { name: "Aspirin", price: 18 },{ name: "Disprin", price: 12 },{ name: "Ibuprofen 400mg", price: 28 },{ name: "Combiflam", price: 40 },
+        { name: "Aceclofenac", price: 55 },{ name: "Diclofenac", price: 48 },{ name: "Amoxicillin 500mg", price: 95 },{ name: "Azithromycin 500mg", price: 110 },
+        { name: "Cefixime 200mg", price: 145 },{ name: "Ciprofloxacin", price: 78 },{ name: "Doxycycline", price: 65 },{ name: "Metronidazole", price: 38 },
+        { name: "Ofloxacin", price: 92 },{ name: "Levofloxacin", price: 125 },{ name: "Pantoprazole", price: 70 },{ name: "Omeprazole", price: 52 },
+        { name: "Rabeprazole", price: 88 },{ name: "Digene", price: 25 },{ name: "Gelusil", price: 30 },{ name: "ENO", price: 12 },
+        { name: "ORS Packet", price: 22 },{ name: "Cetirizine", price: 18 },{ name: "Levocetirizine", price: 42 },{ name: "Allegra 120", price: 210 },
+        { name: "Avil 25", price: 16 },{ name: "Montelukast", price: 98 },{ name: "Cough Syrup Benadryl", price: 115 },{ name: "Ascoril Syrup", price: 128 },
+        { name: "Corex DX", price: 135 },{ name: "Ambroxol", price: 68 },{ name: "Salbutamol Inhaler", price: 165 },{ name: "Budecort Inhaler", price: 325 },
+        { name: "Cetaphil Cream", price: 380 },{ name: "Soframycin", price: 95 },{ name: "Betadine", price: 75 },{ name: "Silverex Cream", price: 125 },
+        { name: "Clotrimazole Cream", price: 82 },{ name: "Candid Powder", price: 95 },{ name: "Volini Spray", price: 210 },{ name: "Moov Spray", price: 195 },
+        { name: "Vicks VapoRub", price: 160 },{ name: "Liv 52", price: 145 },{ name: "Zincovit", price: 110 },{ name: "Becosules", price: 48 },
+        { name: "Shelcal 500", price: 135 },{ name: "Neurobion Forte", price: 42 },{ name: "Evion 400", price: 38 },{ name: "Limcee Vitamin C", price: 28 },
+        { name: "Revital H", price: 340 },{ name: "Electral Powder", price: 24 },{ name: "Insulin Mixtard", price: 165 },{ name: "Glycomet 500", price: 32 },
+        { name: "Glimepiride", price: 58 },{ name: "Telmisartan", price: 105 },{ name: "Amlodipine", price: 48 },{ name: "Atenolol", price: 36 },
+        { name: "Ecosprin 75", price: 14 },{ name: "Atorvastatin", price: 120 },{ name: "Rosuvastatin", price: 165 },{ name: "Thyronorm 50mcg", price: 140 },
+        { name: "Prednisolone", price: 52 },{ name: "Hydrocortisone Cream", price: 68 },{ name: "Alprax 0.5", price: 42 },{ name: "Clonazepam", price: 58 },
+        { name: "Sertraline", price: 120 },{ name: "Fluoxetine", price: 95 },{ name: "Ondansetron", price: 78 },{ name: "Domperidone", price: 55 },
+        { name: "Loperamide", price: 22 },{ name: "Dulcolax", price: 30 },{ name: "Cremaffin Syrup", price: 145 },{ name: "Lactulose Syrup", price: 210 },
+        { name: "Meftal Spas", price: 48 },{ name: "Cyclopam", price: 42 },{ name: "Tranexa 500", price: 155 },{ name: "Ferrous Sulphate", price: 35 },
+        { name: "Dexorange Syrup", price: 165 },{ name: "Livogen", price: 92 },{ name: "Rantac", price: 40 },{ name: "Sinarest", price: 45 },
+        { name: "Nimesulide", price: 58 },{ name: "Piriton", price: 18 },{ name: "Otrivin Nasal Drops", price: 98 },{ name: "Nasivion", price: 92 },
+        { name: "Refresh Tears", price: 185 },{ name: "Ciplox Eye Drops", price: 28 },{ name: "Earwel Ear Drops", price: 65 },{ name: "Mupirocin Ointment", price: 140 },
+        { name: "T-Bact Ointment", price: 98 },{ name: "Benzac AC Gel", price: 265 },{ name: "Retino A Cream", price: 180 },{ name: "Panderm Cream", price: 92 },
+        { name: "Digoxin", price: 48 },{ name: "Lasix 40", price: 26 },{ name: "Sporlac", price: 95 },{ name: "Econorm Sachet", price: 45 }
+    ];
 
-    // All original functions kept intact
+    let items = [];            // { id, name, qty, price, total }
+    let currentGSTPercent = 5; // default 5%
+    let activeIndex = -1;
+
+    // ---------- LOGIN with SHAKE ----------
     function checkLogin() {
         const pass = document.getElementById('passInput').value;
+        const loginCard = document.querySelector('.login-card');
         if(pass === "admin123") {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('resDate').innerText = new Date().toLocaleString('en-IN');
+            updateHeader();
+            renderTable();
         } else {
-            document.getElementById('errorMsg').style.display = 'block';
+            const err = document.getElementById('errorMsg');
+            err.style.display = 'block';
+            loginCard.classList.add('shake-effect');
+            setTimeout(() => loginCard.classList.remove('shake-effect'), 500);
             document.getElementById('passInput').value = "";
         }
     }
+    document.getElementById("passInput").addEventListener("keypress", e => { if(e.key === "Enter") checkLogin(); });
 
-    // Special trigger: pressing enter on the password clicks login button
-    document.getElementById("passInput").addEventListener("keypress", function(event) {
-      if (event.key === "Enter") { checkLogin(); }
-    });
+    // GST setter
+    function setGSTRate(rate) {
+        currentGSTPercent = rate;
+        document.querySelectorAll('.btn-gst').forEach(btn => {
+            if(parseInt(btn.getAttribute('data-gst')) === rate) {
+                btn.classList.add('btn-primary', 'btn-gst-active');
+                btn.classList.remove('btn-outline-primary');
+            } else {
+                btn.classList.remove('btn-primary', 'btn-gst-active');
+                btn.classList.add('btn-outline-primary');
+            }
+        });
+        document.getElementById('gstRateLabel').innerText = rate;
+        renderTable();
+    }
 
     function updateHeader() {
-        document.getElementById('resName').innerText = document.getElementById('cName').value || "---";
-        document.getElementById('resPhone').innerText = document.getElementById('cPhone').value || "---";
+        document.getElementById('resName').innerText = document.getElementById('cName').value.trim() || "---";
+        document.getElementById('resPhone').innerText = document.getElementById('cPhone').value.trim() || "---";
     }
 
     function addItem() {
         const name = document.getElementById('mName').value.trim();
         const qty = parseFloat(document.getElementById('mQty').value);
-        const price = parseFloat(document.getElementById('mPrice').value);
-
-        if(!name || isNaN(qty) || isNaN(price) || qty <= 0 || price < 0) return alert("Error: Please enter a valid Medicine Name, positive Quantity, and valid Price.");
-
-        const item = {
-            id: Date.now(),
-            name: name,
-            qty: qty,
-            price: price,
-            total: qty * price
-        };
-
+        let price = parseFloat(document.getElementById('mPrice').value);
+        if(!name || isNaN(qty) || isNaN(price) || qty <= 0 || price < 0) {
+            alert("❌ Enter valid medicine name, quantity (>0) and valid price.");
+            return;
+        }
+        const item = { id: Date.now(), name, qty, price, total: qty * price };
         items.push(item);
         renderTable();
-        
-        // Clear medicine inputs for next item
+        // Clear fields for next entry
         document.getElementById('mName').value = "";
-        document.getElementById('mQty').value = "1";
         document.getElementById('mPrice').value = "";
-        document.getElementById('mName').focus(); // Put focus back on name
+        document.getElementById('mQty').value = "1";
+        document.getElementById('mName').focus();
+        document.getElementById('autoList').classList.remove('show');
     }
 
     function deleteItem(id) {
@@ -321,58 +445,148 @@
         renderTable();
     }
 
+    // Core rendering: updates dashboard, receipt (with slide animation), sticky bar & receipt GST summary
     function renderTable() {
-        // Updated rendering function to handle BOTH receipt and dashboard table
-        const dashboardTableBody = document.getElementById('resBodyTable');
+        const dashboardBody = document.getElementById('resBodyTable');
         const receiptBody = document.getElementById('resBodyReceipt');
-        const itemCountBadge = document.getElementById('itemCountBadge');
+        const itemCountSpan = document.getElementById('itemCountBadge');
 
-        dashboardTableBody.innerHTML = "";
+        dashboardBody.innerHTML = "";
         receiptBody.innerHTML = "";
-        let grandTotal = 0;
-
-        items.forEach((item, index) => {
-            grandTotal += item.total;
-            
-            // Render for the dashboard list
-            dashboardTableBody.innerHTML += `
+        let subtotal = 0;
+        items.forEach(item => {
+            subtotal += item.total;
+            // Dashboard row
+            dashboardBody.innerHTML += `
                 <tr>
-                    <td class="ps-3 fw-bold">${item.name}</td>
+                    <td class="ps-3 fw-semibold">${escapeHtml(item.name)}</td>
                     <td class="text-center">${item.qty}</td>
-                    <td class="text-center">${item.price.toFixed(2)}</td>
-                    <td class="text-center fw-bold">${item.total.toFixed(2)}</td>
-                    <td class="text-center">
-                        <button class="btn-delete" title="Remove Item" onclick="deleteItem(${item.id})">
-                            <i class="fas fa-trash-alt fa-lg"></i>
-                        </button>
-                    </td>
+                    <td class="text-center">₹${item.price.toFixed(2)}</td>
+                    <td class="text-center fw-bold">₹${item.total.toFixed(2)}</td>
+                    <td class="text-center"><button class="btn-delete" title="Remove" onclick="deleteItem(${item.id})"><i class="fas fa-trash-alt"></i></button></td>
                 </tr>
             `;
-
-            // Render for the actual thermal receipt preview
+            // Receipt row with animation class (will trigger CSS)
             receiptBody.innerHTML += `
-                <tr>
-                    <td>${item.name.substring(0, 15)}</td> <td class="text-center">${item.qty}</td>
-                    <td class="text-center">${item.price.toFixed(0)}</td> <td class="text-center">${item.total.toFixed(2)}</td>
+                <tr class="receipt-item-row">
+                    <td>${escapeHtml(item.name.substring(0, 18))}</td>
+                    <td class="text-center">${item.qty}</td>
+                    <td class="text-center">${item.price.toFixed(2)}</td>
+                    <td class="text-end">${item.total.toFixed(2)}</td>
                 </tr>
             `;
         });
+        if(items.length === 0) {
+            dashboardBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No items added</td></tr>';
+            receiptBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">-- no items --</td></tr>';
+        }
 
-        itemCountBadge.innerText = items.length + " Items";
-        document.getElementById('resTotal').innerText = grandTotal.toFixed(2);
+        // GST Calculations
+        const gstAmount = subtotal * (currentGSTPercent / 100);
+        const grandTotal = subtotal + gstAmount;
+
+        // Sticky bar
+        document.getElementById('stickySubtotal').innerText = `₹${subtotal.toFixed(2)}`;
+        document.getElementById('stickyGstAmount').innerText = `₹${gstAmount.toFixed(2)}`;
+        document.getElementById('stickyGrandTotal').innerText = `₹${grandTotal.toFixed(2)}`;
+        itemCountSpan.innerText = items.length + " Item" + (items.length !== 1 ? "s" : "");
+
+        // Receipt summary area (subtotal, GST, grand total)
+        const receiptSummary = document.getElementById('receiptSummaryBox');
+        receiptSummary.innerHTML = `
+            <div class="d-flex justify-content-between small fw-semibold mb-1"><span>Subtotal :</span> <span>₹${subtotal.toFixed(2)}</span></div>
+            <div class="d-flex justify-content-between small mb-1"><span>GST (${currentGSTPercent}%) :</span> <span>₹${gstAmount.toFixed(2)}</span></div>
+            <div class="d-flex justify-content-between fw-bold mt-1 pt-1 border-top"><span>GRAND TOTAL :</span> <span>₹${grandTotal.toFixed(2)}</span></div>
+        `;
+    }
+
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) { return m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'; });
     }
 
     function resetInvoice() {
-        if(confirm("Are you sure you want to discard this invoice and start a new one?")) {
+        if(items.length > 0 && confirm("Start a new invoice? Current data will be cleared.")) {
             items = [];
             document.getElementById('cName').value = "";
             document.getElementById('cPhone').value = "";
-            updateHeader(); // Reset receipt header
-            renderTable(); // Reset tables
+            updateHeader();
+            renderTable();
             document.getElementById('resDate').innerText = new Date().toLocaleString('en-IN');
+        } else if(items.length === 0) {
+            document.getElementById('cName').value = "";
+            document.getElementById('cPhone').value = "";
+            updateHeader();
         }
     }
-</script>
 
+    // ---------- AUTOCOMPLETE (100 medicines) ----------
+    function showSuggestions(query) {
+        const listDiv = document.getElementById('autoList');
+        activeIndex = -1;
+        if(!query.trim() || query.length < 1) {
+            listDiv.classList.remove('show');
+            listDiv.innerHTML = '';
+            return;
+        }
+        const filtered = medicineDB.filter(m => m.name.toLowerCase().includes(query.toLowerCase())).slice(0, 8);
+        if(filtered.length === 0) {
+            listDiv.classList.remove('show');
+            return;
+        }
+        listDiv.innerHTML = filtered.map((med, idx) => `
+            <div class="autocomplete-item" data-index="${idx}" onclick="selectMedicine('${escapeHtml(med.name)}', ${med.price})">
+                <span>${highlightMatch(med.name, query)}</span>
+                <span class="med-price">₹${med.price.toFixed(2)}</span>
+            </div>
+        `).join('');
+        listDiv.classList.add('show');
+    }
+
+    function highlightMatch(name, query) {
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return name.replace(regex, '<strong class="text-primary">$1</strong>');
+    }
+
+    function selectMedicine(name, price) {
+        document.getElementById('mName').value = name;
+        document.getElementById('mPrice').value = price;
+        document.getElementById('autoList').classList.remove('show');
+        document.getElementById('mQty').focus();
+    }
+
+    function handleKey(event) {
+        const list = document.getElementById('autoList');
+        const itemsList = list.querySelectorAll('.autocomplete-item');
+        if(!itemsList.length) return;
+        if(event.key === 'ArrowDown') {
+            activeIndex = Math.min(activeIndex + 1, itemsList.length - 1);
+            updateActiveItem(itemsList);
+            event.preventDefault();
+        } else if(event.key === 'ArrowUp') {
+            activeIndex = Math.max(activeIndex - 1, 0);
+            updateActiveItem(itemsList);
+            event.preventDefault();
+        } else if(event.key === 'Enter' && activeIndex >= 0) {
+            itemsList[activeIndex].click();
+            event.preventDefault();
+        } else if(event.key === 'Escape') {
+            list.classList.remove('show');
+        }
+    }
+    function updateActiveItem(itemsList) {
+        itemsList.forEach(i => i.classList.remove('active'));
+        if(activeIndex >= 0 && itemsList[activeIndex]) itemsList[activeIndex].classList.add('active');
+    }
+    document.addEventListener('click', function(e) {
+        if(!e.target.closest('.autocomplete-wrapper')) document.getElementById('autoList').classList.remove('show');
+    });
+
+    // Initial default GST button highlight
+    window.addEventListener('DOMContentLoaded', () => {
+        setGSTRate(5);
+    });
+</script>
 </body>
 </html>
+```
