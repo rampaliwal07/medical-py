@@ -3,301 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lifeline Medical System | Elegant Billing</title>
+    <title>LIFELINE MEDICAL | Smart Billing Suite</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #f0f2f5;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #333;
+            background: linear-gradient(145deg, #e9eef3 0%, #f8fafc 100%);
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
         }
 
-        /* Login Screen - Blurred Background */
-        #login-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(44, 62, 80, 0.9);
-            backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
+        /* ----- LOGIN ANIMATIONS ----- */
+        @keyframes fadeSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
         .login-card {
-            width: 400px;
-            border-radius: 20px;
-            overflow: hidden;
+            animation: fadeSlideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
         }
 
-        /* Main App Container */
-        .app-container {
-            display: none; /* Hidden until login */
-            margin-top: 30px;
-            margin-bottom: 50px;
+        .shake-effect {
+            animation: shakeError 0.3s ease-in-out 0s 2;
         }
 
-        /* Cards and Elements Styling */
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 25px;
+        /* Autocomplete styling */
+        .autocomplete-wrapper {
+            position: relative;
         }
-        .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid #eee;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 1.2rem;
-        }
-        .section-icon {
-            color: #0d6efd;
-            margin-right: 10px;
-        }
-
-        /* Form Inputs Modernization */
-        .form-control {
-            border-radius: 10px;
-            padding: 12px;
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
             border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+            z-index: 999;
+            max-height: 240px;
+            overflow-y: auto;
+            display: none;
         }
-        .form-control:focus {
-            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        .autocomplete-list.show {
+            display: block;
+        }
+        .autocomplete-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+        }
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        .autocomplete-item:hover, .autocomplete-item.active {
+            background-color: #eef5ff;
+            color: #0a58ca;
+        }
+        .autocomplete-item .med-price {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2c7da0;
+        }
+
+        /* Receipt row sliding animation */
+        @keyframes slideInNewRow {
+            0% {
+                opacity: 0;
+                transform: translateX(18px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .receipt-item-row {
+            animation: slideInNewRow 0.25s ease-out forwards;
+        }
+
+        /* Sticky summary bar (grand total bar) */
+        .invoice-summary-sticky {
+            background: white;
+            border-top: 2px solid #e2e8f0;
+            border-radius: 0 0 15px 15px;
+            padding: 1rem 1.2rem;
+            margin-top: 0;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.02);
+        }
+
+        .gst-toggle-group .btn-gst {
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-gst-active {
+            background-color: #0d6efd;
+            color: white;
             border-color: #0d6efd;
         }
 
-        /* Buttons Styling */
-        .btn-action {
-            border-radius: 10px;
-            padding: 12px 20px;
-            font-weight: 600;
+        /* receipt summary box */
+        .receipt-summary-box {
+            background: #fef9e6;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            border-left: 3px solid #0d6efd;
         }
-        .btn-add-item { background-color: #198754; color: white; border: none; }
-        .btn-add-item:hover { background-color: #157347; color: white; }
-        
-        .btn-delete {
-            background: none;
-            border: none;
-            color: #dc3545;
-            cursor: pointer;
-            padding: 0;
-            opacity: 0.7;
-        }
-        .btn-delete:hover { opacity: 1; }
 
-        /* Thermal Receipt - Modernized Preview */
         #receipt-area {
-            width: 100%;
             max-width: 320px;
-            background: #fff;
+            background: white;
             margin: 0 auto;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            font-family: 'Courier New', Courier, monospace;
-            color: #000;
-        }
-        
-        .receipt-header h3 { font-size: 1.1rem; }
-        .receipt-table { width: 100%; font-size: 0.85rem; margin-top: 15px; }
-        .receipt-table th { border-bottom: 1px dashed #333; text-align: left; }
-        .receipt-table td { padding: 4px 0; }
-        .receipt-total { border-top: 1px dashed #333; margin-top: 10px; padding-top: 10px; font-weight: bold; }
-
-        @media print {
-            body * { visibility: hidden; }
-            #receipt-area, #receipt-area * { visibility: visible; }
-            #receipt-area { position: absolute; left: 0; top: 0; width: 80mm; box-shadow: none; }
-            .btn-delete { display: none !important; }
+            padding: 18px 14px;
+            border-radius: 16px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+            font-family: 'Courier New', 'SF Mono', monospace;
         }
     </style>
 </head>
 <body>
 
+<!-- LOGIN OVERLAY -->
 <div id="login-overlay">
-    <div class="card login-card shadow-lg">
-        <div class="card-header bg-primary text-white text-center p-4">
+    <div class="card login-card shadow-lg border-0" style="width: 420px;">
+        <div class="card-header bg-gradient bg-primary text-white text-center p-4" style="background: linear-gradient(135deg, #0b5ed7, #0a58ca);">
             <i class="fas fa-hand-holding-medical fa-3x mb-3"></i>
-            <h4 class="mb-0">LIFELINE MEDICAL</h4>
-            <p class="mb-0 opacity-75">Billing System Login</p>
+            <h4 class="mb-0 fw-bold">LIFELINE MEDICAL</h4>
+            <p class="mb-0 opacity-75">Secure Billing Portal</p>
         </div>
         <div class="card-body p-4">
             <div class="mb-4">
-                <label class="form-label text-muted">Admin Password</label>
-                <input type="password" id="passInput" class="form-control text-center fs-5" placeholder="••••••••">
+                <label class="form-label text-muted fw-semibold">Admin Access</label>
+                <input type="password" id="passInput" class="form-control text-center fs-5 py-2" placeholder="••••••••" autocomplete="off">
             </div>
-            <p id="errorMsg" class="text-danger text-center mb-3" style="display:none;">Incorrect Password. Try again.</p>
-            <button class="btn btn-primary btn-action w-100 fs-5" onclick="checkLogin()">Unlock Dashboard <i class="fas fa-lock-open ms-2"></i></button>
+            <p id="errorMsg" class="text-danger text-center mb-3" style="display:none;"><i class="fas fa-exclamation-triangle me-1"></i> Incorrect password. Access denied.</p>
+            <button class="btn btn-primary btn-lg w-100 fw-semibold" onclick="checkLogin()">Unlock Dashboard <i class="fas fa-lock-open ms-2"></i></button>
         </div>
     </div>
 </div>
 
-<div class="container app-container" id="mainApp">
-    
-    <div class="row mb-4 align-items-center">
+<!-- MAIN APP -->
+<div class="container app-container" id="mainApp" style="display: none;">
+    <div class="row mb-4 pt-2 align-items-center">
         <div class="col">
-            <h2 class="fw-bold mb-0 text-primary">Billing Dashboard</h2>
-            <p class="text-muted mb-0">Create and Manage Customer Invoices</p>
+            <h2 class="fw-bold text-primary"><i class="fas fa-clinic-medical me-2"></i>Billing Dashboard</h2>
+            <p class="text-secondary">Generate invoices with GST & smart medicine search</p>
         </div>
-        <div class="col-auto text-end">
-            <div class="text-muted mb-1">Authenticated As: <strong>Admin</strong></div>
-            <button class="btn btn-outline-danger btn-sm" onclick="location.reload()">Logout <i class="fas fa-sign-out-alt"></i></button>
+        <div class="col-auto">
+            <div class="text-muted small mb-1"><i class="fas fa-shield-alt"></i> Admin session</div>
+            <button class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="location.reload()"><i class="fas fa-sign-out-alt me-1"></i> Logout</button>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-4">
+        <!-- LEFT COLUMN: Customer + Items + summary bar -->
         <div class="col-lg-8">
-            
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-user-circle section-icon"></i>Customer Information</h5>
+            <!-- Customer Info -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-user-circle text-primary me-2"></i>Customer details</h5>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Full Name</label>
-                            <input type="text" id="cName" class="form-control" placeholder="John Doe" oninput="updateHeader()">
+                            <label class="form-label fw-semibold">Full name</label>
+                            <input type="text" id="cName" class="form-control" placeholder="Priya Sharma" oninput="updateHeader()">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted">Phone Number</label>
-                            <input type="text" id="cPhone" class="form-control" placeholder="+91 9876543210" oninput="updateHeader()">
+                            <label class="form-label fw-semibold">Phone number</label>
+                            <input type="text" id="cPhone" class="form-control" placeholder="+91 98765 43210" oninput="updateHeader()">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-pills section-icon"></i>Add Medicines</h5>
+            <!-- Add Medicines with Autocomplete -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-pills text-success me-2"></i>Add Medicines</h5>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-5">
-                            <label class="form-label text-muted">Medicine Name</label>
-                            <input type="text" id="mName" class="form-control" placeholder="Paracetamol 500mg">
+                            <label class="form-label fw-semibold">Medicine name</label>
+                            <div class="autocomplete-wrapper">
+                                <input type="text" id="mName" class="form-control" placeholder="Start typing (e.g., Paracetamol)" autocomplete="off" oninput="showSuggestions(this.value)" onkeydown="handleKey(event)">
+                                <div class="autocomplete-list" id="autoList"></div>
+                            </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label text-muted">Quantity</label>
+                            <label class="form-label fw-semibold">Qty</label>
                             <input type="number" id="mQty" class="form-control text-center" min="1" value="1">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label text-muted">Price Per Unit (Rs.)</label>
-                            <input type="number" step="0.01" id="mPrice" class="form-control text-center" placeholder="10.00">
+                            <label class="form-label fw-semibold">Price (₹)</label>
+                            <input type="number" step="0.01" id="mPrice" class="form-control text-center" placeholder="0.00">
                         </div>
                         <div class="col-md-2">
-                            <button class="btn btn-add-item btn-action w-100" onclick="addItem()"><i class="fas fa-plus"></i> Add</button>
+                            <button class="btn btn-success w-100 fw-semibold py-2" onclick="addItem()"><i class="fas fa-plus-circle me-1"></i> Add</button>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-list-ul section-icon"></i>Invoice Items</h5>
-                    <span class="badge bg-primary rounded-pill fs-6" id="itemCountBadge">0 Items</span>
+
+            <!-- Invoice Items Table + STICKY GRAND TOTAL BAR -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2 text-warning"></i>Invoice Items</h5>
+                    <span class="badge bg-primary rounded-pill px-3 py-2" id="itemCountBadge">0 Items</span>
                 </div>
                 <div class="card-body p-0">
-                    <table class="table table-hover table-striped table-bordered align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">Medicine Name</th>
-                                <th class="text-center">Qty</th>
-                                <th class="text-center">Price</th>
-                                <th class="text-center">Total</th>
-                                <th class="text-center" width="60">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resBodyTable">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Medicine</th>
+                                    <th class="text-center" style="width:80px">Qty</th>
+                                    <th class="text-center">Price (₹)</th>
+                                    <th class="text-center">Total (₹)</th>
+                                    <th class="text-center" style="width:60px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="resBodyTable">
+                                <tr><td colspan="5" class="text-center text-muted py-4">No items added</td></tr>
                             </tbody>
-                    </table>
+                        </table>
+                    </div>
+                </div>
+                <!-- STICKY GRAND TOTAL SUMMARY BAR (Subtotal, GST, Grand) -->
+                <div class="invoice-summary-sticky" id="grandTotalStickyBar">
+                    <div class="row align-items-center g-2">
+                        <div class="col-md-5 col-12">
+                            <div class="d-flex gap-3 align-items-center flex-wrap">
+                                <span class="fw-semibold text-secondary">GST Rate :</span>
+                                <div class="btn-group gst-toggle-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary btn-sm btn-gst" data-gst="5" onclick="setGSTRate(5)">5%</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm btn-gst" data-gst="18" onclick="setGSTRate(18)">18%</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7 col-12">
+                            <div class="d-flex justify-content-between flex-wrap gap-2">
+                                <div><span class="text-muted">Subtotal :</span> <strong id="stickySubtotal">₹0.00</strong></div>
+                                <div><span class="text-muted">GST (<span id="gstRateLabel">5</span>%) :</span> <strong id="stickyGstAmount">₹0.00</strong></div>
+                                <div class="text-primary fw-bold fs-6">TOTAL : <span id="stickyGrandTotal">₹0.00</span></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
         </div>
 
-        <div class="col-lg-4 text-center">
-            <h5 class="mb-3 text-muted">Thermal Receipt Preview</h5>
-            
+        <!-- RIGHT COLUMN: Receipt Preview with animation & GST summary -->
+        <div class="col-lg-4">
+            <h5 class="mb-3 text-center text-muted"><i class="fas fa-print me-2"></i>Thermal Receipt Preview</h5>
             <div id="receipt-area">
                 <div class="receipt-header text-center">
-                    <i class="fas fa-hand-holding-medical fa-2x mb-2" style="opacity:0.3;"></i>
-                    <h3 class="fw-bold mb-0">LIFELINE MEDICAL</h3>
-                    <p class="text-muted" style="font-size:0.75rem;">Medical Store, New City<br>Tel: +91 00000 00000</p>
-                    <div style="text-align:left; font-size:0.7rem; margin-top:15px; border-top: 1px dashed #333; padding-top: 10px;">
+                    <i class="fas fa-hand-holding-medical fa-2x mb-2" style="opacity:0.4; color:#0d6efd;"></i>
+                    <h3 class="fw-bold mb-0" style="font-size:1.2rem;">LIFELINE MEDICAL</h3>
+                    <p style="font-size:0.7rem;" class="text-muted">Medical Store, New City<br>+91 98765 43210</p>
+                    <div style="text-align:left; font-size:0.7rem; margin-top:10px; border-top:1px dashed #aaa; padding-top:8px;">
                         CUST: <span id="resName">---</span><br>
                         PHONE: <span id="resPhone">---</span><br>
                         DATE: <span id="resDate"></span>
                     </div>
                 </div>
-
-                <table class="receipt-table">
+                <table class="receipt-table w-100 mt-2" style="font-size:0.75rem;">
                     <thead>
-                        <tr>
-                            <th width="50%">Item</th>
-                            <th width="10%">Qty</th>
-                            <th width="20%">Price</th>
-                            <th width="20%">Total</th>
-                        </tr>
+                        <tr><th>Item</th><th>Qty</th><th>₹</th><th>Total</th></tr>
                     </thead>
-                    <tbody id="resBodyReceipt">
-                        </tbody>
+                    <tbody id="resBodyReceipt"></tbody>
                 </table>
-
-                <div class="receipt-total pt-3 mt-3 d-flex justify-content-between">
-                    <span>GRAND TOTAL</span>
-                    <span class="fs-5">Rs. <span id="resTotal">0.00</span></span>
-                </div>
-                
-                <div class="receipt-footer mt-4 pt-3 text-center" style="border-top:1px dashed #333; font-size:0.75rem;">
-                    *** THANK YOU FOR VISITING! ***<br>
-                    Keep Receipt For Records
+                <!-- Summary area for GST & totals inside receipt -->
+                <div id="receiptSummaryBox" class="receipt-summary-box mt-2"></div>
+                <div class="receipt-footer mt-3 pt-2 text-center" style="border-top:1px dashed #aaa; font-size:0.7rem;">
+                    *** THANK YOU FOR VISITING! ***<br>Keep receipt for records
                 </div>
             </div>
-
-            <div class="d-grid gap-2 mt-4 max-width-320 mx-auto">
-                <button class="btn btn-primary btn-action btn-lg fs-5" onclick="window.print()">Print Receipt <i class="fas fa-print ms-2"></i></button>
-                <button class="btn btn-outline-secondary btn-action" onclick="resetInvoice()">New Invoice <i class="fas fa-file-medical ms-2"></i></button>
+            <div class="d-grid gap-3 mt-4">
+                <button class="btn btn-primary btn-lg fw-semibold shadow-sm" onclick="window.print()"><i class="fas fa-print me-2"></i> Print Receipt</button>
+                <button class="btn btn-outline-secondary fw-semibold" onclick="resetInvoice()"><i class="fas fa-file-invoice me-2"></i> New Invoice</button>
             </div>
         </div>
-
     </div>
 </div>
 
 <script>
-    let items = [];
+    // ---------- MEDICINE DATABASE (autocomplete) ----------
+    const medicineDB = [
+        { name: "Paracetamol 500mg",    price: 2.50  },
+        { name: "Paracetamol 650mg",    price: 3.00  },
+        { name: "Amoxicillin 250mg",    price: 8.00  },
+        { name: "Amoxicillin 500mg",    price: 12.00 },
+        { name: "Azithromycin 250mg",   price: 18.00 },
+        { name: "Azithromycin 500mg",   price: 28.00 },
+        { name: "Cetirizine 10mg",      price: 1.50  },
+        { name: "Metformin 500mg",      price: 5.00  },
+        { name: "Metformin 1000mg",     price: 8.50  },
+        { name: "Omeprazole 20mg",      price: 6.00  },
+        { name: "Pantoprazole 40mg",    price: 7.50  },
+        { name: "Ibuprofen 400mg",      price: 4.00  },
+        { name: "Dolo 650mg",           price: 3.50  },
+        { name: "Crocin Advance",       price: 4.50  },
+        { name: "Aspirin 75mg",         price: 2.00  },
+        { name: "Atorvastatin 10mg",    price: 9.00  },
+        { name: "Atorvastatin 20mg",    price: 14.00 },
+        { name: "Amlodipine 5mg",       price: 6.50  },
+        { name: "Ciprofloxacin 500mg",  price: 15.00 },
+        { name: "Ranitidine 150mg",     price: 4.00  },
+        { name: "Vitamin D3 60K",       price: 22.00 },
+        { name: "Vitamin B12 500mcg",   price: 18.00 },
+        { name: "Calcium + D3 Tablet",  price: 7.00  },
+        { name: "Montelukast 10mg",     price: 11.00 },
+        { name: "Levothyroxine 50mcg",  price: 9.50  }
+    ];
 
-    // All original functions kept intact
+    let items = [];              // { id, name, qty, price, total }
+    let currentGSTPercent = 5;  // 5% or 18%
+    let activeIndex = -1;
+
+    // ---------- LOGIN with shake animation ----------
     function checkLogin() {
         const pass = document.getElementById('passInput').value;
+        const loginCard = document.querySelector('.login-card');
         if(pass === "admin123") {
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             document.getElementById('resDate').innerText = new Date().toLocaleString('en-IN');
+            updateHeader();
+            renderTable();   // initial empty state
         } else {
-            document.getElementById('errorMsg').style.display = 'block';
+            const errorDiv = document.getElementById('errorMsg');
+            errorDiv.style.display = 'block';
+            loginCard.classList.add('shake-effect');
+            setTimeout(() => loginCard.classList.remove('shake-effect'), 500);
             document.getElementById('passInput').value = "";
         }
     }
 
-    // Special trigger: pressing enter on the password clicks login button
-    document.getElementById("passInput").addEventListener("keypress", function(event) {
-      if (event.key === "Enter") { checkLogin(); }
+    document.getElementById("passInput").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") checkLogin();
     });
 
-    function updateHeader() {
-        document.getElementById('resName').innerText = document.getElementById('cName').value || "---";
-        document.getElementById('resPhone').innerText = document.getElementById('cPhone').value || "---";
+    // GST setter & re-render
+    function setGSTRate(rate) {
+        currentGSTPercent = rate;
+        // update UI buttons active style
+        document.querySelectorAll('.btn-gst').forEach(btn => {
+            if(parseInt(btn.getAttribute('data-gst')) === rate) {
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-primary', 'btn-gst-active');
+            } else {
+                btn.classList.remove('btn-primary', 'btn-gst-active');
+                btn.classList.add('btn-outline-primary');
+            }
+        });
+        document.getElementById('gstRateLabel').innerText = rate;
+        renderTable();   // refresh everything
     }
 
+    function updateHeader() {
+        document.getElementById('resName').innerText = document.getElementById('cName').value.trim() || "---";
+        document.getElementById('resPhone').innerText = document.getElementById('cPhone').value.trim() || "---";
+    }
+
+    // add item logic
     function addItem() {
         const name = document.getElementById('mName').value.trim();
         const qty = parseFloat(document.getElementById('mQty').value);
-        const price = parseFloat(document.getElementById('mPrice').value);
-
-        if(!name || isNaN(qty) || isNaN(price) || qty <= 0 || price < 0) return alert("Error: Please enter a valid Medicine Name, positive Quantity, and valid Price.");
-
+        let price = parseFloat(document.getElementById('mPrice').value);
+        if(!name || isNaN(qty) || isNaN(price) || qty <= 0 || price < 0) {
+            alert("❌ Please enter valid medicine name, quantity (>0) and price.");
+            return;
+        }
         const item = {
             id: Date.now(),
             name: name,
@@ -305,15 +410,15 @@
             price: price,
             total: qty * price
         };
-
         items.push(item);
         renderTable();
-        
-        // Clear medicine inputs for next item
+        // Clear inputs but keep focus on name for quick scanning
         document.getElementById('mName').value = "";
-        document.getElementById('mQty').value = "1";
         document.getElementById('mPrice').value = "";
-        document.getElementById('mName').focus(); // Put focus back on name
+        document.getElementById('mQty').value = "1";
+        document.getElementById('mName').focus();
+        // close autocomplete if open
+        document.getElementById('autoList').classList.remove('show');
     }
 
     function deleteItem(id) {
@@ -321,58 +426,196 @@
         renderTable();
     }
 
+    // Main render: dashboard table, receipt items, totals with GST, sticky bar & receipt summary
     function renderTable() {
-        // Updated rendering function to handle BOTH receipt and dashboard table
-        const dashboardTableBody = document.getElementById('resBodyTable');
+        const dashboardBody = document.getElementById('resBodyTable');
         const receiptBody = document.getElementById('resBodyReceipt');
-        const itemCountBadge = document.getElementById('itemCountBadge');
-
-        dashboardTableBody.innerHTML = "";
+        const itemCountSpan = document.getElementById('itemCountBadge');
+        
+        dashboardBody.innerHTML = "";
         receiptBody.innerHTML = "";
-        let grandTotal = 0;
-
-        items.forEach((item, index) => {
-            grandTotal += item.total;
-            
-            // Render for the dashboard list
-            dashboardTableBody.innerHTML += `
+        
+        let subtotal = 0;
+        items.forEach(item => {
+            subtotal += item.total;
+            // Dashboard row
+            dashboardBody.innerHTML += `
                 <tr>
-                    <td class="ps-3 fw-bold">${item.name}</td>
+                    <td class="ps-3 fw-semibold">${escapeHtml(item.name)}</td>
                     <td class="text-center">${item.qty}</td>
-                    <td class="text-center">${item.price.toFixed(2)}</td>
-                    <td class="text-center fw-bold">${item.total.toFixed(2)}</td>
+                    <td class="text-center">₹${item.price.toFixed(2)}</td>
+                    <td class="text-center fw-bold">₹${item.total.toFixed(2)}</td>
                     <td class="text-center">
-                        <button class="btn-delete" title="Remove Item" onclick="deleteItem(${item.id})">
-                            <i class="fas fa-trash-alt fa-lg"></i>
+                        <button class="btn-delete border-0 bg-transparent text-danger" title="Remove" onclick="deleteItem(${item.id})">
+                            <i class="fas fa-trash-alt"></i>
                         </button>
                     </td>
                 </tr>
             `;
-
-            // Render for the actual thermal receipt preview
+            // Receipt row with slide animation class
             receiptBody.innerHTML += `
-                <tr>
-                    <td>${item.name.substring(0, 15)}</td> <td class="text-center">${item.qty}</td>
-                    <td class="text-center">${item.price.toFixed(0)}</td> <td class="text-center">${item.total.toFixed(2)}</td>
+                <tr class="receipt-item-row">
+                    <td>${escapeHtml(item.name.substring(0, 18))}</td>
+                    <td class="text-center">${item.qty}</td>
+                    <td class="text-center">${item.price.toFixed(2)}</td>
+                    <td class="text-end">${item.total.toFixed(2)}</td>
                 </tr>
             `;
         });
-
-        itemCountBadge.innerText = items.length + " Items";
-        document.getElementById('resTotal').innerText = grandTotal.toFixed(2);
+        
+        if(items.length === 0) {
+            dashboardBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No items added</td></tr>';
+            receiptBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">-- no items --</td></tr>';
+        }
+        
+        // ---------- GST Calculations ----------
+        const gstRate = currentGSTPercent;
+        const gstAmount = subtotal * (gstRate / 100);
+        const grandTotal = subtotal + gstAmount;
+        
+        // Update sticky summary bar
+        document.getElementById('stickySubtotal').innerText = `₹${subtotal.toFixed(2)}`;
+        document.getElementById('stickyGstAmount').innerText = `₹${gstAmount.toFixed(2)}`;
+        document.getElementById('stickyGrandTotal').innerText = `₹${grandTotal.toFixed(2)}`;
+        
+        // Receipt Summary Box (showing subtotal, gst, final)
+        const receiptSummaryDiv = document.getElementById('receiptSummaryBox');
+        receiptSummaryDiv.innerHTML = `
+            <div class="d-flex justify-content-between small fw-semibold mb-1">
+                <span>Subtotal :</span> <span>₹${subtotal.toFixed(2)}</span>
+            </div>
+            <div class="d-flex justify-content-between small mb-1">
+                <span>GST (${gstRate}%) :</span> <span>₹${gstAmount.toFixed(2)}</span>
+            </div>
+            <div class="d-flex justify-content-between fw-bold mt-1 pt-1 border-top border-dark">
+                <span>GRAND TOTAL :</span> <span>₹${grandTotal.toFixed(2)}</span>
+            </div>
+        `;
+        
+        itemCountSpan.innerText = items.length + " Item" + (items.length !== 1 ? "s" : "");
     }
-
+    
+    // Helper to escape HTML
+    function escapeHtml(str) {
+        if(!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if(m === '&') return '&amp;';
+            if(m === '<') return '&lt;';
+            if(m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // Reset invoice
     function resetInvoice() {
-        if(confirm("Are you sure you want to discard this invoice and start a new one?")) {
+        if(items.length > 0 && confirm("Start a new invoice? Current data will be cleared.")) {
             items = [];
             document.getElementById('cName').value = "";
             document.getElementById('cPhone').value = "";
-            updateHeader(); // Reset receipt header
-            renderTable(); // Reset tables
+            updateHeader();
+            renderTable();
             document.getElementById('resDate').innerText = new Date().toLocaleString('en-IN');
+            // reset GST to default 5% but keep visual
+            setGSTRate(5);
+        } else if(items.length === 0) {
+            document.getElementById('cName').value = "";
+            document.getElementById('cPhone').value = "";
+            updateHeader();
+            renderTable();
         }
     }
+    
+    // ---------- AUTOCOMPLETE LOGIC ----------
+    function showSuggestions(query) {
+        const listDiv = document.getElementById('autoList');
+        activeIndex = -1;
+        if (!query.trim() || query.trim().length < 1) {
+            listDiv.classList.remove('show');
+            listDiv.innerHTML = '';
+            return;
+        }
+        const filtered = medicineDB.filter(m =>
+            m.name.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 8);
+        if (filtered.length === 0) {
+            listDiv.classList.remove('show');
+            return;
+        }
+        listDiv.innerHTML = filtered.map((med, idx) => `
+            <div class="autocomplete-item" data-index="${idx}" onclick="selectMedicine('${escapeHtml(med.name)}', ${med.price})">
+                <span>${highlightMatch(med.name, query)}</span>
+                <span class="med-price">₹${med.price.toFixed(2)}</span>
+            </div>
+        `).join('');
+        listDiv.classList.add('show');
+    }
+    
+    function highlightMatch(name, query) {
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return name.replace(regex, '<strong class="text-primary">$1</strong>');
+    }
+    
+    function selectMedicine(name, price) {
+        document.getElementById('mName').value = name;
+        document.getElementById('mPrice').value = price.toFixed(2);
+        document.getElementById('autoList').classList.remove('show');
+        document.getElementById('mQty').focus();
+    }
+    
+    function handleKey(event) {
+        const list = document.getElementById('autoList');
+        const itemsList = list.querySelectorAll('.autocomplete-item');
+        if (!itemsList.length) return;
+        if (event.key === 'ArrowDown') {
+            activeIndex = Math.min(activeIndex + 1, itemsList.length - 1);
+            updateActiveItem(itemsList);
+            event.preventDefault();
+        } else if (event.key === 'ArrowUp') {
+            activeIndex = Math.max(activeIndex - 1, 0);
+            updateActiveItem(itemsList);
+            event.preventDefault();
+        } else if (event.key === 'Enter' && activeIndex >= 0) {
+            itemsList[activeIndex].click();
+            event.preventDefault();
+        } else if (event.key === 'Escape') {
+            document.getElementById('autoList').classList.remove('show');
+        }
+    }
+    
+    function updateActiveItem(itemsList) {
+        itemsList.forEach(i => i.classList.remove('active'));
+        if (activeIndex >= 0 && itemsList[activeIndex]) {
+            itemsList[activeIndex].classList.add('active');
+        }
+    }
+    
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.autocomplete-wrapper')) {
+            document.getElementById('autoList').classList.remove('show');
+        }
+    });
+    
+    // Initial GST UI selection (default 5%)
+    window.addEventListener('DOMContentLoaded', () => {
+        // style default gst active
+        const defaultBtn = document.querySelector('.btn-gst[data-gst="5"]');
+        if(defaultBtn) {
+            defaultBtn.classList.add('btn-primary', 'btn-gst-active');
+            defaultBtn.classList.remove('btn-outline-primary');
+        }
+        setGSTRate(5);
+    });
+    
+    // additional binding update on cName/cPhone for header live
+    window.updateHeader = updateHeader;
+    window.deleteItem = deleteItem;
+    window.addItem = addItem;
+    window.setGSTRate = setGSTRate;
+    window.resetInvoice = resetInvoice;
+    window.checkLogin = checkLogin;
+    window.showSuggestions = showSuggestions;
+    window.selectMedicine = selectMedicine;
+    window.handleKey = handleKey;
 </script>
-
 </body>
 </html>
